@@ -17,6 +17,17 @@
   },
   "homepage": "https://github.com/norbertvolf/odql#readme",
   "dependencies": {
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.0",
+    "printf": "^0.2.5",
+    "request": "^2.83.0",
+    "xml2js": "^0.4.19"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-cached": "^1.1.1",
+    "gulp-eslint": "^4.0.0",
+    "gulp-jsbeautifier": "^2.1.1",
+    "gulp-util": "^3.0.8",
+    "gulp-watch": "^4.3.11"
   }
 }
