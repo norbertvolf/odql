@@ -4,7 +4,8 @@
   "description": "An interactive terminal based client for OData services",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha --recursive test/unit",
+    "watch": "./node_modules/mocha/bin/mocha -w  -R min --recursive test/unit"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,9 @@
     "gulp-eslint": "^4.0.0",
     "gulp-jsbeautifier": "^2.1.1",
     "gulp-util": "^3.0.8",
-    "gulp-watch": "^4.3.11"
+    "gulp-watch": "^4.3.11",
+    "mocha": "^4.0.1",
+    "mock-require": "^2.0.2",
+    "sinon": "^4.1.2"
   }
 }
