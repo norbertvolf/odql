@@ -8,7 +8,9 @@ const mock = require("mock-require");
 describe("index", function() {
 	before(function() {});
 
-	afterEach(function() {});
+	afterEach(function() {
+		mock.stopAll();
+	});
 
 
 	it("Shuld print help when argument parsing fails ", function() {
@@ -54,7 +56,7 @@ describe("index", function() {
 		});
 	});
 
-	it("Shuld print the CLI error when connection fails.", function(done) {
+	it("Should print the CLI error when connection fails.", function(done) {
 		var options = {
 			"parseArgs": sinon.stub().returns(true),
 			"getUrl": sinon.stub().returns("URL")

@@ -1,3 +1,9 @@
 # odql
 
-Once upon time
+## Usage
+
+```
+odql http://services.odata.org/northwind/northwind.svc/
+```
+
+
