@@ -12,7 +12,8 @@ describe("lib/cli", function() {
 	var readline;
 	var printf;
 	var processAction;
-	var parse;
+	var nearley;
+	var grammar;
 
 	beforeEach(function() {
 		process = {
@@ -33,19 +34,34 @@ describe("lib/cli", function() {
 				"on": sinon.stub()
 			})
 		};
+		nearley = {
+			"Parser": function() {
+				this.results = ["ACTION"];
+			},
+			"Grammar": {
+				"fromCompiled": sinon.stub().returns("COMPILED_GRAMMAR")
+			}
+		};
+		nearley.Parser.prototype.feed = sinon.stub();
+		sinon.spy(nearley, "Parser");
+
+		grammar = {
+			"name": "GRAMMAR"
+		};
 		printf = sinon.stub().returns("TEST");
 		processAction = sinon.stub();
-		parse = sinon.stub().returns("ACTION");
 
 		mock("process", process);
 		mock("readline", readline);
 		mock("printf", printf);
-		mock("../../../lib/parse", parse);
+		mock("nearley", nearley);
+		mock("../../../lib/grammar", grammar);
 		mock("../../../lib/process-action", processAction);
 
 		Cli = mock.reRequire("../../../lib/cli");
 		cliInstance = new Cli("ODATA", options);
 	});
+
 	afterEach(function() {
 		mock.stopAll();
 	});
@@ -82,8 +98,10 @@ describe("lib/cli", function() {
 			"prompt": options.getPrompt()
 		});
 		cliInstance.handlerLine(readlineInstance, "ODATA", "LINE");
-		assert(parse.calledWithExactly("LINE"), "Pass line to parser.");
-		assert(processAction.calledWithExactly("ACTION", readlineInstance, "ODATA"), "Action correctly called.");
+		assert(nearley.Parser.prototype.feed.calledWithExactly("LINE"), "Parser fried by line.");
+		assert(nearley.Grammar.fromCompiled.calledWithExactly(grammar), "Grammar correctly compiled.");
+		assert(nearley.Parser.calledWithExactly("COMPILED_GRAMMAR"), "Grammar passed to parser.");
+		assert(processAction.calledWithExactly("ACTION", Cli, readlineInstance, "ODATA"), "Action correctly called.");
 		assert(readlineInstance.prompt.called, "Prompt called again.");
 	});
 });

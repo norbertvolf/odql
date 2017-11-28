@@ -9,7 +9,7 @@ var prettify = require("gulp-jsbeautifier");
 var cache = require("gulp-cached");
 
 //Define configuration
-var jsFiles = ["index.js", "bin/odql", "lib/**/*.js", "test/**/*.js"];
+var jsFiles = ["!lib/grammar.js", "index.js", "bin/odql", "lib/**/*.js", "test/**/*.js"];
 var jsonFiles = [".eslintrc", ".jsbeautifyrc"];
 
 gulp.task("prettifyJson", function() {

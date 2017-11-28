@@ -13,15 +13,20 @@ describe("index", function() {
 	});
 
 
-	it("Shuld print help when argument parsing fails ", function() {
+	it("Should print help when argument parsing fails ", function() {
 		var options = {
 			"parseArgs": sinon.stub().returns(false)
 		};
 		var help = {
 			"getHelp": sinon.stub()
 		};
+		var cli = {
+			"log": sinon.stub()
+		};
 		mock("../../lib/options", options);
 		mock("../../lib/help", help);
+		mock("../../lib/cli", cli);
+
 		mock.reRequire("../../index")();
 
 		assert(options.parseArgs.called, "options.parseArgs method has been called");
@@ -29,7 +34,7 @@ describe("index", function() {
 	});
 
 
-	it("Shuld open the CLI help when argument parsing passing ", function() {
+	it("Should open the CLI help when argument parsing passing ", function() {
 		var options = {
 			"parseArgs": sinon.stub().returns(true),
 			"getUrl": sinon.stub().returns("URL")
@@ -37,9 +42,7 @@ describe("index", function() {
 		var odata = {
 			"connect": sinon.stub().returns(Promise.resolve())
 		};
-		var cli = {
-			"start": sinon.stub()
-		};
+		var cli = sinon.stub();
 		mock("../../lib/options", options);
 		mock("../../lib/odata", odata);
 		mock("../../lib/cli", cli);
@@ -50,8 +53,8 @@ describe("index", function() {
 			assert(options.parseArgs.called, "options.parseArgs method has been called");
 			assert(odata.connect.calledWith("URL"), "pass url from options to the connect");
 			assert(
-				cli.start.args[0][0] === odata &&
-				cli.start.args[0][1] === options,
+				cli.args[0][0] === odata &&
+				cli.args[0][1] === options,
 				"options and odata instances passed to the cli module");
 		});
 	});
@@ -70,7 +73,8 @@ describe("index", function() {
 				assert(odata.connect.calledWith("URL"), "pass url from options to the connect");
 				assert(err === "ERROR");
 				done();
-			}
+			},
+			"log": sinon.stub()
 		};
 		mock("../../lib/options", options);
 		mock("../../lib/odata", odata);
