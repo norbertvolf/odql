@@ -1,3 +1,4 @@
+/* eslint no-console: 0 */
 "use strict";
 
 const assert = require("assert");
@@ -18,12 +19,8 @@ describe("lib/cli", function() {
 	beforeEach(function() {
 		process = {
 			"exit": sinon.stub(),
-			"stdout": {
-				"write": sinon.stub()
-			},
-			"stderr": {
-				"write": sinon.stub()
-			}
+			"stdout": {},
+			"stderr": {}
 		};
 		options = {
 			"getPrompt": sinon.stub().returns("PROMPT")
@@ -78,14 +75,18 @@ describe("lib/cli", function() {
 		assert(readline.createInterface().on.calledWith("close"), "Close event registered.");
 	});
 	it("#log", function() {
+		sinon.stub(console, "log");
 		mock.reRequire("../../../lib/cli").log("TEST", "IS", "OK");
-		assert(process.stdout.write.calledWithExactly("TEST"), "output format printf passed to the stdout");
+		assert(console.log.calledWithExactly("TEST"), "output format printf passed to the stdout");
 		assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
+		console.log.restore();
 	});
 	it("#error", function() {
+		sinon.stub(console, "error");
 		mock.reRequire("../../../lib/cli").error("TEST", "IS", "OK");
-		assert(process.stderr.write.calledWithExactly("TEST"), "output format printf passed to the stderr");
+		assert(console.error.calledWithExactly("TEST"), "output format printf passed to the stdout");
 		assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
+		console.error.restore();
 	});
 	it(".handlerClose", function() {
 		cliInstance.handlerClose();
