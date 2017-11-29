@@ -76,14 +76,14 @@ describe("lib/cli", function() {
 	});
 	it("#log", function() {
 		sinon.stub(console, "log");
-		mock.reRequire("../../../lib/cli").log("TEST", "IS", "OK");
+		Cli.log("TEST", "IS", "OK");
 		assert(console.log.calledWithExactly("TEST"), "output format printf passed to the stdout");
 		assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
 		console.log.restore();
 	});
 	it("#error", function() {
 		sinon.stub(console, "error");
-		mock.reRequire("../../../lib/cli").error("TEST", "IS", "OK");
+		Cli.error("TEST", "IS", "OK");
 		assert(console.error.calledWithExactly("TEST"), "output format printf passed to the stdout");
 		assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
 		console.error.restore();
@@ -92,17 +92,38 @@ describe("lib/cli", function() {
 		cliInstance.handlerClose();
 		assert(process.exit.calledWithExactly(0), "Exits the process.");
 	});
-	it(".handlerLine", function() {
-		var readlineInstance = readline.createInterface({
-			"input": process.stdin,
-			"output": process.stdout,
-			"prompt": options.getPrompt()
+
+	describe(".handlerLine", function() {
+		it("Line successfuly parsed", function() {
+			var readlineInstance = readline.createInterface({
+				"input": process.stdin,
+				"output": process.stdout,
+				"prompt": options.getPrompt()
+			});
+			cliInstance.handlerLine(readlineInstance, "ODATA", options, "LINE");
+			assert(nearley.Parser.prototype.feed.calledWithExactly("LINE"), "Parser fried by line.");
+			assert(nearley.Grammar.fromCompiled.calledWithExactly(grammar), "Grammar correctly compiled.");
+			assert(nearley.Parser.calledWithExactly("COMPILED_GRAMMAR"), "Grammar passed to parser.");
+			assert(processAction.calledWithExactly("ACTION", Cli, readlineInstance, "ODATA"), "Action correctly called.");
+			assert(readlineInstance.prompt.called, "Prompt called again.");
 		});
-		cliInstance.handlerLine(readlineInstance, "ODATA", "LINE");
-		assert(nearley.Parser.prototype.feed.calledWithExactly("LINE"), "Parser fried by line.");
-		assert(nearley.Grammar.fromCompiled.calledWithExactly(grammar), "Grammar correctly compiled.");
-		assert(nearley.Parser.calledWithExactly("COMPILED_GRAMMAR"), "Grammar passed to parser.");
-		assert(processAction.calledWithExactly("ACTION", Cli, readlineInstance, "ODATA"), "Action correctly called.");
-		assert(readlineInstance.prompt.called, "Prompt called again.");
+
+		it("Line parsed failes", function() {
+			var readlineInstance = readline.createInterface({
+				"input": process.stdin,
+				"output": process.stdout,
+				"prompt": options.getPrompt()
+			});
+			nearley.Parser.prototype.feed = sinon.stub().throws({
+				"offset": 1,
+				"message": "ERROR"
+			});
+
+			sinon.stub(Cli, "log");
+			cliInstance.handlerLine(readlineInstance, "ODATA", options, "LINE");
+			assert(readlineInstance.prompt.called, "Prompt called again.");
+			assert.deepEqual(Cli.log.args[0], ["-------^\n"], "Printed error marker.");
+			assert.deepEqual(Cli.log.args[1], ["ERROR"], "Printed error marker.");
+		});
 	});
 });
