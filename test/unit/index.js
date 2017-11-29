@@ -60,7 +60,7 @@ describe("index", function() {
 		options.parseArgs = sinon.stub().returns(true);
 		odata.prototype.connect = sinon.stub().returns(Promise.reject("ERROR"));
 
-		return main().then(function(instances) {
+		return main().then(function() {
 			assert(options.parseArgs.called, "options.parseArgs method has been called");
 			assert(odata.prototype.connect.calledWith("URL"), "pass url from options to the connect");
 			assert(cli.error.calledWithExactly("ERROR"), "Connect has reject with error");

@@ -8,7 +8,7 @@ command ->  _ "\\dt" _ {% function(d) {return { "action": "LIST", "type" : "Enti
 			return {
 				"action": "SHOW",
 				"type" : "EntitySet",
-				"entityName" : d[3].join("")
+				"entitySetName" : d[3].join("")
 			};
 		}
 	%}

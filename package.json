@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/norbertvolf/odql#readme",
   "dependencies": {
+    "lodash": "^4.17.4",
     "minimist": "^1.2.0",
     "nearley": "^2.11.0",
     "printf": "^0.2.5",
