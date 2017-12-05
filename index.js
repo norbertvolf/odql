@@ -10,26 +10,24 @@ module.exports = function() {
 	var cli;
 	var odata;
 
+
 	return new Promise(function(resolve) {
-		if (options.parseArgs(argv)) {
+		options.read(argv).then(() => {
 			odata = new OData();
-			odata.connect(options.getUrl()).then(() => {
-				cli = new Cli(odata, options);
-				resolve({
-					"cli": cli,
-					"odata": odata
-				});
-			}).catch(function() {
-				Cli.error.apply(null, Array.prototype.slice.call(arguments));
-				resolve();
+			return odata.connect(options.getUrl());
+		}).then(() => {
+			cli = new Cli(odata, options);
+			resolve({
+				"cli": cli,
+				"odata": odata
 			});
-		} else {
-			Cli.log(help.getHelp());
+		}).catch(function(err) {
+			if (err.name === "SHOW_HELP") {
+				Cli.log(help.getHelp());
+			} else {
+				Cli.error.apply(null, Array.prototype.slice.call(arguments));
+			}
 			resolve();
-		}
-		return {
-			"cli": cli,
-			"odata": odata
-		};
+		});
 	});
 };

@@ -13,7 +13,7 @@ describe("index", function() {
 
 	beforeEach(function() {
 		options = {
-			"parseArgs": sinon.stub().returns(false),
+			"read": sinon.stub(),
 			"getUrl": sinon.stub().returns("URL")
 		};
 		help = {
@@ -27,8 +27,6 @@ describe("index", function() {
 
 		mock("../../lib/options", options);
 		mock("../../lib/odata", odata);
-		mock("../../lib/cli", cli);
-		mock("../../lib/options", options);
 		mock("../../lib/help", help);
 		mock("../../lib/cli", cli);
 		main = mock.reRequire("../../index");
@@ -39,31 +37,32 @@ describe("index", function() {
 	});
 
 	it("Should print help when argument parsing fails ", function() {
+		options.read.returns(Promise.reject({
+			"name": "SHOW_HELP"
+		}));
 		return main().then(function() {
-			assert(options.parseArgs.called, "options.parseArgs method has been called");
 			assert(help.getHelp.called, "help.getHelp  method has been called");
 		});
 	});
 
 	it("Should open the CLI help when argument parsing passing ", function() {
-		options.parseArgs = sinon.stub().returns(true);
+		options.read.returns(Promise.resolve());
 		odata.prototype.connect = sinon.stub().returns(Promise.resolve());
 
 		return main().then(function(instances) {
-			assert(options.parseArgs.called, "options.parseArgs method has been called");
-			assert(instances.odata.connect.calledWith("URL"), "pass url from options to the connect");
 			assert.deepEqual(cli.args[0], [instances.odata, options], "options and odata instances passed to the cli module");
+			assert(options.getUrl.called, "options asked fo getUrl");
+			assert(instances.cli instanceof cli, "Cli is correctly created");
 		});
 	});
 
 	it("Should print the CLI error when connection fails.", function() {
-		options.parseArgs = sinon.stub().returns(true);
-		odata.prototype.connect = sinon.stub().returns(Promise.reject("ERROR"));
+		var error = new Error("TEST");
+		options.read.returns(Promise.resolve());
+		odata.prototype.connect = sinon.stub().returns(Promise.reject(error));
 
 		return main().then(function() {
-			assert(options.parseArgs.called, "options.parseArgs method has been called");
-			assert(odata.prototype.connect.calledWith("URL"), "pass url from options to the connect");
-			assert(cli.error.calledWithExactly("ERROR"), "Connect has reject with error");
+			assert(cli.error.calledWithExactly(error), "Connect has reject with error");
 		});
 	});
 });
