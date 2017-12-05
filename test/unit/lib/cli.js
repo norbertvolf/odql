@@ -74,6 +74,7 @@ describe("lib/cli", function() {
 		assert(readline.createInterface().on.calledWith("line"), "Line event registered.");
 		assert(readline.createInterface().on.calledWith("close"), "Close event registered.");
 	});
+
 	it("#log", function() {
 		sinon.stub(console, "log");
 		Cli.log("TEST", "IS", "OK");
@@ -81,13 +82,24 @@ describe("lib/cli", function() {
 		assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
 		console.log.restore();
 	});
-	it("#error", function() {
-		sinon.stub(console, "error");
-		Cli.error("TEST", "IS", "OK");
-		assert(console.error.calledWithExactly("TEST"), "output format printf passed to the stdout");
-		assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
-		console.error.restore();
+
+	describe("#error", function() {
+		it("Pass arguments as standard parameters", function() {
+			sinon.stub(console, "error");
+			Cli.error("TEST", "IS", "OK");
+			assert(console.error.calledWithExactly("TEST"), "output format printf passed to the stdout");
+			assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
+			console.error.restore();
+		});
+		it("Pass arguments as array", function() {
+			sinon.stub(console, "error");
+			Cli.error(["TEST", "IS", "OK"]);
+			assert(console.error.calledWithExactly("TEST"), "output format printf passed to the stdout");
+			assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
+			console.error.restore();
+		});
 	});
+
 	it(".handlerClose", function() {
 		cliInstance.handlerClose();
 		assert(process.exit.calledWithExactly(0), "Exits the process.");
@@ -108,7 +120,7 @@ describe("lib/cli", function() {
 			assert(readlineInstance.prompt.called, "Prompt called again.");
 		});
 
-		it("Line parsed failes", function() {
+		it("Line parsed fails", function() {
 			var readlineInstance = readline.createInterface({
 				"input": process.stdin,
 				"output": process.stdout,
