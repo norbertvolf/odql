@@ -52,7 +52,7 @@ describe("lib/cli", function() {
 		mock("readline", readline);
 		mock("printf", printf);
 		mock("nearley", nearley);
-		mock("../../../lib/grammar", grammar);
+		mock("../../../lib/grammar/cli", grammar);
 		mock("../../../lib/process-action", processAction);
 
 		Cli = mock.reRequire("../../../lib/cli");

@@ -6,8 +6,8 @@
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --recursive test/unit",
     "watch": "./node_modules/mocha/bin/mocha -w  -R min --recursive test/unit",
-    "compile": "./node_modules/nearley/bin/nearleyc.js lib/odql.ne -o lib/grammar.js",
-    "compile-config": "./node_modules/nearley/bin/nearleyc.js lib/odql-config.ne -o lib/grammar-config.js"
+    "compile": "./node_modules/nearley/bin/nearleyc.js lib/grammar/cli.ne -o lib/grammar/cli.js",
+    "compile-config": "./node_modules/nearley/bin/nearleyc.js lib/grammar/options.ne -o lib/grammar/options.js"
   },
   "repository": {
     "type": "git",
