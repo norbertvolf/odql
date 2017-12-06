@@ -62,7 +62,7 @@ describe("index", function() {
 		odata.prototype.connect = sinon.stub().returns(Promise.reject(error));
 
 		return main().then(function() {
-			assert(cli.error.calledWithExactly(error), "Connect has reject with error");
+			assert(cli.error.calledWithExactly(error.toString()), "Connect has reject with error");
 		});
 	});
 });

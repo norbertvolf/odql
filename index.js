@@ -25,7 +25,7 @@ module.exports = function() {
 			if (err.name === "SHOW_HELP") {
 				Cli.log(help.getHelp());
 			} else {
-				Cli.error.apply(null, Array.prototype.slice.call(arguments));
+				Cli.error(err.toString());
 			}
 			resolve();
 		});
