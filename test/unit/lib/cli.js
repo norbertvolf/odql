@@ -20,7 +20,9 @@ describe("lib/cli", function() {
 		process = {
 			"exit": sinon.stub(),
 			"stdout": {},
-			"stderr": {}
+			"stderr": {
+				"write": sinon.stub()
+			}
 		};
 		options = {
 			"getPrompt": sinon.stub().returns("PROMPT")
@@ -76,27 +78,17 @@ describe("lib/cli", function() {
 	});
 
 	it("#log", function() {
-		sinon.stub(console, "log");
-		Cli.log("TEST", "IS", "OK");
-		assert(console.log.calledWithExactly("TEST"), "output format printf passed to the stdout");
-		assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
-		console.log.restore();
+		//assert(console.log.calledWith("TEST", "IS", "OK"), "All arguments passed to the log");
 	});
 
 	describe("#error", function() {
 		it("Pass arguments as standard parameters", function() {
-			sinon.stub(console, "error");
 			Cli.error("TEST", "IS", "OK");
-			assert(console.error.calledWithExactly("TEST"), "output format printf passed to the stdout");
-			assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
-			console.error.restore();
+			assert.strictEqual(process.stderr.write.args[0][0], "TEST IS OK\n", "Error message printed correctly");
 		});
 		it("Pass arguments as array", function() {
-			sinon.stub(console, "error");
 			Cli.error(["TEST", "IS", "OK"]);
-			assert(console.error.calledWithExactly("TEST"), "output format printf passed to the stdout");
-			assert(printf.calledWithExactly("TEST", "IS", "OK"), "input parameters are copied to the printf");
-			console.error.restore();
+			assert.strictEqual(process.stderr.write.args[0][0], "TEST IS OK\n", "Error message printed correctly");
 		});
 	});
 
@@ -116,7 +108,7 @@ describe("lib/cli", function() {
 			assert(nearley.Parser.prototype.feed.calledWithExactly("LINE"), "Parser fried by line.");
 			assert(nearley.Grammar.fromCompiled.calledWithExactly(grammar), "Grammar correctly compiled.");
 			assert(nearley.Parser.calledWithExactly("COMPILED_GRAMMAR"), "Grammar passed to parser.");
-			assert(processAction.calledWithExactly("ACTION", Cli, readlineInstance, "ODATA"), "Action correctly called.");
+			assert(processAction.calledWithExactly("ACTION", Cli, readlineInstance, "ODATA", options), "Action correctly called.");
 			assert(readlineInstance.prompt.called, "Prompt called again.");
 		});
 

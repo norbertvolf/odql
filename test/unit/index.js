@@ -38,7 +38,7 @@ describe("index", function() {
 
 	it("Should print help when argument parsing fails ", function() {
 		options.read.returns(Promise.reject({
-			"name": "SHOW_HELP"
+			"message": "HELP"
 		}));
 		return main().then(function() {
 			assert(help.getHelp.called, "help.getHelp  method has been called");
@@ -62,7 +62,7 @@ describe("index", function() {
 		odata.prototype.connect = sinon.stub().returns(Promise.reject(error));
 
 		return main().then(function() {
-			assert(cli.error.calledWithExactly(error.toString()), "Connect has reject with error");
+			assert(cli.error.calledWithExactly(error), "Connect has reject with error");
 		});
 	});
 });

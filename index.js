@@ -22,7 +22,7 @@ module.exports = function() {
 				"odata": odata
 			});
 		}).catch(function(err) {
-			if (err.name === "SHOW_HELP") {
+			if (err.message === "HELP") {
 				Cli.log(help.getHelp());
 			} else {
 				Cli.error(err);
