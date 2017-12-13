@@ -10,11 +10,13 @@ module.exports = function() {
 	var cli;
 	var odata;
 
-
 	return new Promise(function(resolve) {
 		options.read(argv).then(() => {
+			return options.getUsername() ? Cli.readPassword(options) : Promise.resolve(null);
+		}).then((password) => {
+			options.setPassword(password);
 			odata = new OData();
-			return odata.connect(options.getUrl());
+			return odata.connect(options);
 		}).then(() => {
 			cli = new Cli(odata, options);
 			resolve({

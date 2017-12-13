@@ -30,6 +30,12 @@ group -> _ "[" "alias" "]"  _ (aliasProperty):+ _ {%
 				"layout" : d[5][0]
 			};
 		} %}
+	| _ "[" "network" "]"  _ networkProperty:* _ {%
+		function(d) {
+			return {
+				"network" : d[5][0]
+			};
+		} %}
 
 #Property tokens
 aliasProperty -> _ [0-9A-Za-z_]:*  _ "=" _ url _ {%	function(d) {
@@ -45,8 +51,18 @@ layoutProperty -> _ "prompt"  _ "=" _ prompt _ {%
 			};
 		} %}
 
+networkProperty -> _ "strict-ssl"  _ "=" _ boolean _ {%
+		function(d) {
+			return {
+				"strictSSL": d[5]
+			};
+		} %}
+
 
 #Simple tokens
 prompt -> [0-9A-Za-z/:#?$=><]:*    {% id %}
-url -> [0-9A-Za-z/:#?$=.]:*         {% id %}
+boolean -> "true"    {% function () { return true; }  %}
+		|  "false"   {% function () { return false; }  %}
+
+url -> [0-9A-Za-z/:#?$=._]:*         {% id %}
 _ -> [\s\n]:*                      {% function(d) {return null; } %}
