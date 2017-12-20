@@ -14,7 +14,10 @@ describe("index", function() {
 	beforeEach(function() {
 		options = {
 			"read": sinon.stub(),
-			"getUrl": sinon.stub().returns("URL")
+			"getUrl": sinon.stub().returns("URL"),
+			"getUsername": sinon.stub().returns(null),
+			"getPassword": sinon.stub().returns(null),
+			"setPassword": sinon.stub().returns(null)
 		};
 		help = {
 			"getHelp": sinon.stub()
@@ -45,17 +48,6 @@ describe("index", function() {
 		});
 	});
 
-	it("Should open the CLI help when argument parsing passing ", function() {
-		options.read.returns(Promise.resolve());
-		odata.prototype.connect = sinon.stub().returns(Promise.resolve());
-
-		return main().then(function(instances) {
-			assert.deepEqual(cli.args[0], [instances.odata, options], "options and odata instances passed to the cli module");
-			assert(options.getUrl.called, "options asked fo getUrl");
-			assert(instances.cli instanceof cli, "Cli is correctly created");
-		});
-	});
-
 	it("Should print the CLI error when connection fails.", function() {
 		var error = new Error("TEST");
 		options.read.returns(Promise.resolve());
@@ -63,6 +55,16 @@ describe("index", function() {
 
 		return main().then(function() {
 			assert(cli.error.calledWithExactly(error), "Connect has reject with error");
+		});
+	});
+
+	it("Should open the CLI help when argument parsing passing ", function() {
+		options.read.returns(Promise.resolve());
+		odata.prototype.connect = sinon.stub().returns(Promise.resolve());
+
+		return main().then(function(instances) {
+			assert.deepEqual(cli.args[0], [instances.odata, options], "options and odata instances passed to the cli module");
+			assert(instances.cli instanceof cli, "Cli is correctly created");
 		});
 	});
 });
