@@ -2,9 +2,7 @@
 
 ## Usage
 
-```
 odql http://services.odata.org/northwind/northwind.svc/
-```
 
 ## TODO
 
@@ -19,5 +17,5 @@ Implement expanded LIMIT OFFSET keywords
 
 ##BUGS
 
-Fix alignment of list of entitysets with sap:... attributes
-Fix freeze after "Ctrl-C" press
+Fix size  sap:... attributes is invalid
+Fix freeze after "Ctrl-C" press during password input
