@@ -69,4 +69,19 @@ describe("lib/formatter/terminal", function() {
 				}], "Normalized settings contains only values from recordset");
 		});
 	});
+
+	describe("#renderCenteredText", function() {
+		it("Text has lesser length than width", function() {
+			assert.strictEqual(formatter.renderCenteredText("TEST", 10), "   TEST   ");
+			assert.strictEqual(formatter.renderCenteredText("TEST", 9), "   TEST  ");
+			assert.strictEqual(formatter.renderCenteredText("TEST", 13), "     TEST    ");
+		});
+		it("Text has same length as width", function() {
+			assert.strictEqual(formatter.renderCenteredText("TEST", 4), "TEST");
+			assert.strictEqual(formatter.renderCenteredText("TESTTESTTESTT", 13), "TESTTESTTESTT");
+		});
+		it("Text has greater length than width", function() {
+			assert.strictEqual(formatter.renderCenteredText("TEST", 3), "TEST");
+		});
+	});
 });
