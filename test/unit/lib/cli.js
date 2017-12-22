@@ -20,6 +20,7 @@ describe("lib/cli", function() {
 		process = {
 			"exit": sinon.stub(),
 			"stdout": {},
+			"stdin": {},
 			"stderr": {
 				"write": sinon.stub()
 			}
@@ -77,10 +78,6 @@ describe("lib/cli", function() {
 		assert(readline.createInterface().on.calledWith("close"), "Close event registered.");
 	});
 
-	it("#log", function() {
-		//assert(console.log.calledWith("TEST", "IS", "OK"), "All arguments passed to the log");
-	});
-
 	describe("#error", function() {
 		it("Pass arguments as standard parameters", function() {
 			Cli.error("TEST", "IS", "OK");
@@ -130,4 +127,82 @@ describe("lib/cli", function() {
 			assert.deepEqual(Cli.log.args[1], ["ERROR"], "Printed error marker.");
 		});
 	});
+
+	describe("#readPassword", function() {
+		it("Promise successfully created", function() {
+			process.stdout.write = sinon.stub();
+			process.stdin.resume = sinon.stub();
+			process.stdin.on = sinon.stub();
+			process.stdin.setRawMode = sinon.stub();
+			process.stdin.setEncoding = sinon.stub();
+
+			Cli.readPassword();
+
+			assert(process.stdout.write.calledWithExactly("Password: "));
+			assert(process.stdin.resume.calledTwice);
+			assert(process.stdin.setRawMode.calledWithExactly(true));
+			assert(process.stdin.setEncoding.calledWithExactly("utf8"));
+		});
+
+		it("Correct password readed from stdin", function(done) {
+			process.stdout.write = sinon.stub();
+			process.stdin.resume = sinon.stub();
+			process.stdin.pause = sinon.stub();
+			process.stdin.removeAllListeners = sinon.stub();
+			process.stdin.on = function(type, eventHandler) {
+				setTimeout(function() {
+					eventHandler("password");
+					eventHandler("\n");
+				}, 0);
+			};
+			process.stdin.setRawMode = sinon.stub();
+			process.stdin.setEncoding = sinon.stub();
+
+			Cli.readPassword().then(function(password) {
+				assert.equal(password, "password");
+				assert.ok(process.stdin.pause.calledOnce);
+				assert.deepEqual(process.stdin.setRawMode.args, [
+					[true],
+					[false]
+				], "Enabled raw mode and disable raw mode after the password is readed.");
+				assert.ok(process.stdin.removeAllListeners.calledOnce);
+				assert.ok(process.stdin.removeAllListeners.calledWithExactly("data"), "Remove listeners in the end.");
+				assert.deepEqual(process.stdout.write.args, [
+					["Password: "],
+					["*"],
+					["\n"]
+				], "Print prompt, asterisk and EOL");
+				done();
+			});
+		});
+
+
+		it("Reject when user stop password input", function(done) {
+			process.stdout.write = sinon.stub();
+			process.stdin.resume = sinon.stub();
+			process.stdin.pause = sinon.stub();
+			process.stdin.removeAllListeners = sinon.stub();
+			process.stdin.on = function(type, eventHandler) {
+				setTimeout(function() {
+					eventHandler("\u0003");
+				}, 0);
+			};
+			process.stdin.setRawMode = sinon.stub();
+			process.stdin.setEncoding = sinon.stub();
+
+			Cli.readPassword().catch(function(err) {
+				assert.equal(err.message, "Password entering stopped.", "Read password rejected with correct message");
+				assert.ok(process.stdin.pause.calledOnce);
+				assert.deepEqual(process.stdin.setRawMode.args, [
+					[true],
+					[false]
+				], "Enabled raw mode and disable raw mode after the password is readed.");
+				assert.ok(process.stdin.removeAllListeners.calledOnce);
+				assert.ok(process.stdin.removeAllListeners.calledWithExactly("data"), "Remove listeners in the end.");
+				done();
+			});
+		});
+
+	});
+
 });

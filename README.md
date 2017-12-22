@@ -26,7 +26,3 @@ In cloned reposiory run
   * Implement semi colon as terminator
   * Implement expanded output (\x)
   * Implement expanded LIMIT OFFSET keywords
-
-## BUGS
-
-  * Fix freeze after "Ctrl-C" press during password input
