@@ -18,11 +18,14 @@ In cloned reposiory run
 
 ## TODO
 
-  * Implement csrf-token handling
   * Save history to file
-  * Implement references description in entity set definition from associations
   * Implement debug parameter to print stack if there is error
+  * Implement references description in entity set definition from associations
   * Implement output sending to pipe for PAGER
   * Implement semi colon as terminator
   * Implement expanded output (\x)
-  * Implement expanded LIMIT OFFSET keywords
+  * Implement csrf-token handling
+
+## BUGS
+
+  * Show headers for empty recordset
