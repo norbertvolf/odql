@@ -36,6 +36,12 @@ group -> _ "[" "alias" "]"  _ (aliasProperty):+ _ {%
 				"network" : d[5][0]
 			};
 		} %}
+	| _ "[" "log" "]"  _ logProperty:* _ {%
+		function(d) {
+			return {
+				"log" : d[5][0]
+			};
+		} %}
 
 #Property tokens
 aliasProperty -> _ [0-9A-Za-z_]:*  _ "=" _ url _ {%	function(d) {
@@ -50,11 +56,16 @@ layoutProperty -> _ "prompt"  _ "=" _ prompt _ {%
 				"prompt": d[5].join("")
 			};
 		} %}
-
 networkProperty -> _ "strict-ssl"  _ "=" _ boolean _ {%
 		function(d) {
 			return {
 				"strictSSL": d[5]
+			};
+		} %}
+logProperty -> _ "trace"  _ "=" _ boolean _ {%
+		function(d) {
+			return {
+				"trace": d[5]
 			};
 		} %}
 

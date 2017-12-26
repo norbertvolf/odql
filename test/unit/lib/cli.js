@@ -26,7 +26,8 @@ describe("lib/cli", function() {
 			}
 		};
 		options = {
-			"getPrompt": sinon.stub().returns("PROMPT")
+			"getPrompt": sinon.stub().returns("PROMPT"),
+			"getTrace": sinon.stub()
 		};
 		readline = {
 			"createInterface": sinon.stub().returns({
@@ -55,11 +56,12 @@ describe("lib/cli", function() {
 		mock("readline", readline);
 		mock("printf", printf);
 		mock("nearley", nearley);
+		mock("../../../lib/options", options);
 		mock("../../../lib/grammar/cli", grammar);
 		mock("../../../lib/process-action", processAction);
 
 		Cli = mock.reRequire("../../../lib/cli");
-		cliInstance = new Cli("ODATA", options);
+		cliInstance = new Cli("ODATA");
 	});
 
 	afterEach(function() {
@@ -87,6 +89,19 @@ describe("lib/cli", function() {
 			Cli.error(["TEST", "IS", "OK"]);
 			assert.strictEqual(process.stderr.write.args[0][0], "TEST IS OK\n", "Error message printed correctly");
 		});
+		it("Pass arguments as error", function() {
+			var err = new Error("TEST");
+			err.stack = "STACK";
+			Cli.error(err);
+			assert.strictEqual(process.stderr.write.args[0][0], "TEST\n", "Error object printed correctly");
+		});
+		it("Pass arguments as error with trace option on", function() {
+			var err = new Error("TEST");
+			err.stack = "STACK";
+			options.getTrace.returns(true);
+			Cli.error(err);
+			assert.strictEqual(process.stderr.write.args[0][0], "TEST\nSTACK\n", "Error object printed correctly");
+		});
 	});
 
 	it(".handlerClose", function() {
@@ -101,7 +116,7 @@ describe("lib/cli", function() {
 				"output": process.stdout,
 				"prompt": options.getPrompt()
 			});
-			cliInstance.handlerLine(readlineInstance, "ODATA", options, "LINE");
+			cliInstance.handlerLine(readlineInstance, "ODATA", "LINE");
 			assert(nearley.Parser.prototype.feed.calledWithExactly("LINE"), "Parser fried by line.");
 			assert(nearley.Grammar.fromCompiled.calledWithExactly(grammar), "Grammar correctly compiled.");
 			assert(nearley.Parser.calledWithExactly("COMPILED_GRAMMAR"), "Grammar passed to parser.");
@@ -121,7 +136,7 @@ describe("lib/cli", function() {
 			});
 
 			sinon.stub(Cli, "log");
-			cliInstance.handlerLine(readlineInstance, "ODATA", options, "LINE");
+			cliInstance.handlerLine(readlineInstance, "ODATA", "LINE");
 			assert(readlineInstance.prompt.called, "Prompt called again.");
 			assert.deepEqual(Cli.log.args[0], ["-------^\n"], "Printed error marker.");
 			assert.deepEqual(Cli.log.args[1], ["ERROR"], "Printed error marker.");
