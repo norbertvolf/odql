@@ -1,79 +1,100 @@
+@{%
+
+const moo = require("moo")
+
+const CAMELIZATION = {
+	"history size" : "historySize",
+	"history file" : "historyFile",
+	"strict ssl" : "strictSSL",
+};
+
+let lexer = moo.compile({
+	prompt : /(?:prompt)\s*=/,
+    trace  : /(?:trace)\s*=/,
+	history_size : /(?:history)\s+(?:size)\s*=/,
+	history_file : /(?:history)\s+(?:file)\s*=/,
+	strict_ssl : /(?:strict)\s+(?:ssl)\s*=/,
+    space: {match: /[\s]+/, lineBreaks: true},
+    key: /(?:[a-zA-Z][^\s]*)\s*=/,
+    true: "true",
+    false: "false",
+    integer: /-?(?:[1-9][0-9]+|[0-9])/,
+    string: /(?:[^\s]+[^\n]*)/,
+    "[alias]": "[alias]",
+    "[ui]": "[ui]",
+    "[network]": "[network]"
+})
+
+function extractKey(d) {
+	return d[0].value.replace(/\s*=/, "");
+}
+
+function extractUiProperty(d) {
+	return {
+		group : "ui",
+		key : CAMELIZATION[d[1][0]] ? CAMELIZATION[d[1][0]] : d[1][0],
+		value : d[3]
+	};
+}
+
+function extractNetworkProperty(d) {
+	return {
+		group : "network",
+		key : CAMELIZATION[d[1][0]] ? CAMELIZATION[d[1][0]] : d[1][0],
+		value : d[3]
+	};
+}
+
+%}
+
+@lexer lexer
+
 # This is a grammar for odql config
-config -> _ (group):+ _ {%
-			function(d) {
-				var config = {};
-				d[1].forEach( (group) => {
-					Object.keys(group[0]).forEach((key) => {
-						config[key] = group[0][key];
-					});
-				});
-				return config;
-			} %}
+options -> _ (alias | ui | network):+ _ {% function(d) {
+	return d[1];
+} %}
 
-group -> _ "[" "alias" "]"  _ (aliasProperty):+ _ {%
+alias -> "[alias]"  _ (aliasProperty):+ {%
 		function(d) {
-			var aliases = {
-			};
+			return d[2];
+		} %}
 
-			d[5].forEach((alias) => {
-				Object.keys(alias[0]).forEach((key) => {
-					aliases[key] = alias[0][key];
-				});
-			});
-			return {
-				"aliases" : aliases
-			};
-		} %}
-	| _ "[" "layout" "]"  _ layoutProperty:* _ {%
+ui -> "[ui]"  _ (uiProperty):+ {%
 		function(d) {
-			return {
-				"layout" : d[5][0]
-			};
+			return d[2];
 		} %}
-	| _ "[" "network" "]"  _ networkProperty:* _ {%
+
+network -> "[network]"  _ (networkProperty):+ {%
 		function(d) {
-			return {
-				"network" : d[5][0]
-			};
+			return d[2];
 		} %}
-	| _ "[" "log" "]"  _ logProperty:* _ {%
-		function(d) {
+
+#Alias properties
+aliasProperty -> _ key  _ string _ {% function(d) {
 			return {
-				"log" : d[5][0]
+				group : "aliases",
+				key : d[1],
+				value : d[3]
 			};
 		} %}
 
-#Property tokens
-aliasProperty -> _ [0-9A-Za-z_]:*  _ "=" _ url _ {%	function(d) {
-			var token = {};
-			token[d[1].join("")] = d[5].join("");
-			return token;
-		} %}
+#UI properties
+uiProperty -> _ (prompt | history_file) _ string _ {% extractUiProperty %}
+		|  _ (trace) _ boolean _ {% extractUiProperty %}
+		|  _ (history_size) _ integer _ {% extractUiProperty %}
 
-layoutProperty -> _ "prompt"  _ "=" _ prompt _ {%
-		function(d) {
-			return {
-				"prompt": d[5].join("")
-			};
-		} %}
-networkProperty -> _ "strict-ssl"  _ "=" _ boolean _ {%
-		function(d) {
-			return {
-				"strictSSL": d[5]
-			};
-		} %}
-logProperty -> _ "trace"  _ "=" _ boolean _ {%
-		function(d) {
-			return {
-				"trace": d[5]
-			};
-		} %}
-
+#Network properties
+networkProperty -> _ (strict_ssl)  _  boolean _ {% extractNetworkProperty %}
 
 #Simple tokens
-prompt -> [0-9A-Za-z/:#?$=><]:*    {% id %}
+prompt -> %prompt {% extractKey %}
+trace  -> %trace {% extractKey %}
+history_size -> %history_size {% extractKey %}
+history_file -> %history_file {% extractKey %}
+strict_ssl -> %strict_ssl {% extractKey %}
+key -> %key {% extractKey %}
+string -> %string {% function(d) { return d[0].value; } %}
+integer -> %integer {% function(d) { return parseInt(d[0].value, 10); } %}
 boolean -> "true"    {% function () { return true; }  %}
 		|  "false"   {% function () { return false; }  %}
-
-url -> [0-9A-Za-z/:#?$=._]:*         {% id %}
-_ -> [\s\n]:*                      {% function(d) {return null; } %}
+_ -> null | %space {% function(d) { return null; } %}
