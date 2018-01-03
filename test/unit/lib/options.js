@@ -39,14 +39,11 @@ describe("lib/options", function() {
 
 	describe("#parseConfig", () => {
 		it("Property prompt", function() {
-			assert.deepEqual(options.parseConfig("[layout]\n\tprompt = #> "), {
-				"layout": {
+			assert.deepEqual(options.parseConfig("[ui]\n\tprompt = #> "), {
+				"ui": {
 					"prompt": "#>"
 				}
 			}, "Corectly parsed valid prompt definition");
-			assert.throws(() => {
-				options.parseConfig("[layout]\n\tprompt = a! ");
-			}, Error, "Invalid characters throws error");
 		});
 		it("Aliases", () => {
 			assert.deepEqual(options.parseConfig(
@@ -67,7 +64,7 @@ describe("lib/options", function() {
 				"One alias is correctly parsed"
 			);
 			assert.deepEqual(options.parseConfig(
-					"[alias]\n\t"), undefined,
+					"[alias]\n\t"), {},
 				"Empty alias return object"
 			);
 			assert.throws(() => {
@@ -79,12 +76,12 @@ describe("lib/options", function() {
 		});
 		it("Full config", () => {
 			var config =
-				"[layout]\n" +
+				"[ui]\n" +
 				"    prompt = #>\n" +
 				"[alias]\n" +
 				"    northwind = http://services.odata.org/northwind/northwind.svc/\n";
 			var result = {
-				"layout": {
+				"ui": {
 					"prompt": "#>"
 				},
 				"aliases": {
@@ -132,5 +129,18 @@ describe("lib/options", function() {
 			}, Error);
 		});
 	});
+
+	describe("#findHistoryFile", function() {
+		it("Absolute path", function() {
+			assert.strictEqual(options.findHistoryFile("/etc/.history"), "/etc/.history");
+		});
+
+		it("Relative path", function() {
+			sinon.stub(options, "configFilename").returns("/home/.odqlrc");
+			assert.strictEqual(options.findHistoryFile(".history"), "/home/.history");
+			options.configFilename.restore();
+		});
+	});
+
 
 });

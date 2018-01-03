@@ -3,7 +3,7 @@
 const assert = require("assert");
 const mock = require("mock-require");
 
-describe("lib/cli", function() {
+describe("lib/odata", function() {
 	var OData;
 
 	beforeEach(function() {

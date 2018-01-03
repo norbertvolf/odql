@@ -4,7 +4,7 @@ const assert = require("assert");
 const mock = require("mock-require");
 const sinon = require("sinon");
 
-describe("lib/cli", function() {
+describe("lib/odata/get", function() {
 	var get;
 	var testEnitySet;
 

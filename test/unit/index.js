@@ -59,12 +59,11 @@ describe("index", function() {
 	});
 
 	it("Should open the CLI help when argument parsing passing ", function() {
-		options.read.returns(Promise.resolve());
+		options.read.returns(Promise.reject(new Error("HELP")));
 		odata.prototype.connect = sinon.stub().returns(Promise.resolve());
 
-		return main().then(function(instances) {
-			assert.deepEqual(cli.args[0], [instances.odata, options], "options and odata instances passed to the cli module");
-			assert(instances.cli instanceof cli, "Cli is correctly created");
+		return main().then(function() {
+			assert(cli.log.called && help.getHelp.called, "Help printed to stdout.");
 		});
 	});
 });

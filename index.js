@@ -18,8 +18,11 @@ module.exports = function() {
 			odata = new OData();
 			return odata.connect(options);
 		}).then(() => {
-			cli = new Cli(odata, options);
-			resolve({
+			cli = new Cli(odata);
+			return cli.readHistory();
+		}).then(() => {
+			//Return cli and odata just for testing purpose
+			return resolve({
 				"cli": cli,
 				"odata": odata
 			});

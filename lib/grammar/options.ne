@@ -15,6 +15,7 @@ let lexer = moo.compile({
 	history_file : /(?:history)\s+(?:file)\s*=/,
 	strict_ssl : /(?:strict)\s+(?:ssl)\s*=/,
     space: {match: /[\s]+/, lineBreaks: true},
+	url: /https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=]{2,256}\.)+[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_\+.~#?&//=]*)/,
     key: /(?:[a-zA-Z][^\s]*)\s*=/,
     true: "true",
     false: "false",
@@ -23,7 +24,7 @@ let lexer = moo.compile({
     "[alias]": "[alias]",
     "[ui]": "[ui]",
     "[network]": "[network]"
-})
+});
 
 function extractKey(d) {
 	return d[0].value.replace(/\s*=/, "");
@@ -70,7 +71,7 @@ network -> "[network]"  _ (networkProperty):+ {%
 		} %}
 
 #Alias properties
-aliasProperty -> _ key  _ string _ {% function(d) {
+aliasProperty -> _ key  _ url _ {% function(d) {
 			return {
 				group : "aliases",
 				key : d[1],
@@ -94,6 +95,7 @@ history_file -> %history_file {% extractKey %}
 strict_ssl -> %strict_ssl {% extractKey %}
 key -> %key {% extractKey %}
 string -> %string {% function(d) { return d[0].value; } %}
+url -> %url {% function(d) { return d[0].value; } %}
 integer -> %integer {% function(d) { return parseInt(d[0].value, 10); } %}
 boolean -> "true"    {% function () { return true; }  %}
 		|  "false"   {% function () { return false; }  %}

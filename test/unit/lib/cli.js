@@ -15,6 +15,7 @@ describe("lib/cli", function() {
 	var processAction;
 	var nearley;
 	var grammar;
+	var fs;
 
 	beforeEach(function() {
 		process = {
@@ -35,6 +36,7 @@ describe("lib/cli", function() {
 				"on": sinon.stub()
 			})
 		};
+		fs = {};
 		nearley = {
 			"Parser": function() {
 				this.results = ["ACTION"];
@@ -56,6 +58,7 @@ describe("lib/cli", function() {
 		mock("readline", readline);
 		mock("printf", printf);
 		mock("nearley", nearley);
+		mock("fs", fs);
 		mock("../../../lib/options", options);
 		mock("../../../lib/grammar/cli", grammar);
 		mock("../../../lib/process-action", processAction);
@@ -116,6 +119,8 @@ describe("lib/cli", function() {
 				"output": process.stdout,
 				"prompt": options.getPrompt()
 			});
+
+			sinon.stub(cliInstance, "saveHistory");
 			cliInstance.handlerLine(readlineInstance, "ODATA", "LINE");
 			assert(nearley.Parser.prototype.feed.calledWithExactly("LINE"), "Parser fried by line.");
 			assert(nearley.Grammar.fromCompiled.calledWithExactly(grammar), "Grammar correctly compiled.");
@@ -191,7 +196,6 @@ describe("lib/cli", function() {
 			});
 		});
 
-
 		it("Reject when user stop password input", function(done) {
 			process.stdout.write = sinon.stub();
 			process.stdin.resume = sinon.stub();
@@ -217,7 +221,87 @@ describe("lib/cli", function() {
 				done();
 			});
 		});
-
 	});
 
+	describe("#saveHistory", function() {
+		it("History correctly saved", function(done) {
+			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			fs.writeFile = sinon.stub();
+			cliInstance.saveHistory([]).then(() => {
+				assert.ok(fs.writeFile.calledWith("HISTORY_FILE_PATH", "[]"));
+				done();
+			});
+			fs.writeFile.args[0][2]();
+		});
+		it("History file access error", function(done) {
+			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			fs.writeFile = sinon.stub();
+			cliInstance.saveHistory([]).catch((err) => {
+				assert.strictEqual(err, "ERROR");
+				done();
+			});
+			fs.writeFile.args[0][2]("ERROR");
+		});
+	});
+
+	describe("#readHistory", function() {
+		it("Keep history array if history file does not exists", function(done) {
+			var readlineInstance = {
+				"history": []
+			};
+			fs.existsSync = sinon.stub().returns(false);
+			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			cliInstance.readHistory(readlineInstance).then((history) => {
+				assert.deepEqual(readlineInstance.history, history);
+				assert.deepEqual(history, []);
+				done();
+			});
+		});
+		it("Read history successfully", function(done) {
+			var readlineInstance = {
+				"history": []
+			};
+			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			fs.existsSync = sinon.stub().returns(true);
+			fs.readFile = sinon.stub();
+
+			Cli.prototype.readHistory.call(cliInstance, readlineInstance).then((history) => {
+				assert.deepEqual(readlineInstance.history, history);
+				assert.deepEqual(history, ["HISTORY_ITEM"]);
+				done();
+			});
+			fs.readFile.args[0][2](undefined, "[\"HISTORY_ITEM\"]");
+		});
+
+		it("Try to read history file with invalid content", function(done) {
+			var readlineInstance = {
+				"history": []
+			};
+			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			fs.existsSync = sinon.stub().returns(true);
+			fs.readFile = sinon.stub();
+
+			Cli.prototype.readHistory.call(cliInstance, readlineInstance).then((history) => {
+				assert.deepEqual(readlineInstance.history, history);
+				assert.deepEqual(history, []);
+				done();
+			});
+			fs.readFile.args[0][2](undefined, "[HISTORY_ITEM]");
+		});
+
+		it("Try to read history with file access error", function(done) {
+			var readlineInstance = {
+				"history": []
+			};
+			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			fs.existsSync = sinon.stub().returns(true);
+			fs.readFile = sinon.stub();
+
+			Cli.prototype.readHistory.call(cliInstance, readlineInstance).catch((err) => {
+				assert.deepEqual(err, "ERROR");
+				done();
+			});
+			fs.readFile.args[0][2]("ERROR", "[HISTORY_ITEM]");
+		});
+	});
 });
