@@ -14,10 +14,9 @@ describe("index", function() {
 	beforeEach(function() {
 		options = {
 			"read": sinon.stub(),
-			"getUrl": sinon.stub().returns("URL"),
-			"getUsername": sinon.stub().returns(null),
-			"getPassword": sinon.stub().returns(null),
-			"setPassword": sinon.stub().returns(null)
+			"url": "URL",
+			"username": null,
+			"password": null
 		};
 		help = {
 			"getHelp": sinon.stub()

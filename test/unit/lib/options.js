@@ -142,5 +142,31 @@ describe("lib/options", function() {
 		});
 	});
 
+	describe("#read", function() {
+		it("Ask for help if arguments missing", function(done) {
+			sinon.stub(options, "configOptions").returns(Promise.resolve());
+			options.read({
+				"_": []
+			}).catch((err) => {
+				assert(err.message === "HELP");
+				done();
+			});
+		});
+		it("URL and username from arguments processed", function(done) {
+			sinon.stub(options, "configOptions").returns(Promise.resolve({}));
+			sinon.stub(options, "postProcessOptions").returns("PREOPTIONS");
+			sinon.stub(options, "defineProperties");
+			options.read({
+				"_": ["URL", "USERNAME"]
+			}).then(() => {
+				assert(options.configOptions.called);
+				assert.strictEqual(options.postProcessOptions.args[0][0].url, "URL");
+				assert.strictEqual(options.postProcessOptions.args[0][0].username, "USERNAME");
+				assert.strictEqual(options.defineProperties.args[0][1], "PREOPTIONS");
+				done();
+			});
+		});
+	});
+
 
 });

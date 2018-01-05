@@ -12,9 +12,9 @@ module.exports = function() {
 
 	return new Promise(function(resolve) {
 		options.read(argv).then(() => {
-			return options.getUsername() ? Cli.readPassword(options) : Promise.resolve(null);
+			return options.username ? Cli.readPassword(options) : Promise.resolve(null);
 		}).then((password) => {
-			options.setPassword(password);
+			options.password = password;
 			odata = new OData();
 			return odata.connect(options);
 		}).then(() => {

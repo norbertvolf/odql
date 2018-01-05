@@ -27,8 +27,8 @@ describe("lib/cli", function() {
 			}
 		};
 		options = {
-			"getPrompt": sinon.stub().returns("PROMPT"),
-			"getTrace": sinon.stub()
+			"prompt": "PROMPT",
+			"trace": false
 		};
 		readline = {
 			"createInterface": sinon.stub().returns({
@@ -101,7 +101,7 @@ describe("lib/cli", function() {
 		it("Pass arguments as error with trace option on", function() {
 			var err = new Error("TEST");
 			err.stack = "STACK";
-			options.getTrace.returns(true);
+			options.trace = true;
 			Cli.error(err);
 			assert.strictEqual(process.stderr.write.args[0][0], "TEST\nSTACK\n", "Error object printed correctly");
 		});
@@ -117,7 +117,7 @@ describe("lib/cli", function() {
 			var readlineInstance = readline.createInterface({
 				"input": process.stdin,
 				"output": process.stdout,
-				"prompt": options.getPrompt()
+				"prompt": options.prompt
 			});
 
 			sinon.stub(cliInstance, "saveHistory");
@@ -133,7 +133,7 @@ describe("lib/cli", function() {
 			var readlineInstance = readline.createInterface({
 				"input": process.stdin,
 				"output": process.stdout,
-				"prompt": options.getPrompt()
+				"prompt": options.prompt
 			});
 			nearley.Parser.prototype.feed = sinon.stub().throws({
 				"offset": 1,
@@ -225,7 +225,7 @@ describe("lib/cli", function() {
 
 	describe("#saveHistory", function() {
 		it("History correctly saved", function(done) {
-			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			options.historyFile = "HISTORY_FILE_PATH";
 			fs.writeFile = sinon.stub();
 			cliInstance.saveHistory([]).then(() => {
 				assert.ok(fs.writeFile.calledWith("HISTORY_FILE_PATH", "[]"));
@@ -234,7 +234,7 @@ describe("lib/cli", function() {
 			fs.writeFile.args[0][2]();
 		});
 		it("History file access error", function(done) {
-			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			options.historyFile = "HISTORY_FILE_PATH";
 			fs.writeFile = sinon.stub();
 			cliInstance.saveHistory([]).catch((err) => {
 				assert.strictEqual(err, "ERROR");
@@ -250,7 +250,7 @@ describe("lib/cli", function() {
 				"history": []
 			};
 			fs.existsSync = sinon.stub().returns(false);
-			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			options.historyFile = "HISTORY_FILE_PATH";
 			cliInstance.readHistory(readlineInstance).then((history) => {
 				assert.deepEqual(readlineInstance.history, history);
 				assert.deepEqual(history, []);
@@ -261,7 +261,7 @@ describe("lib/cli", function() {
 			var readlineInstance = {
 				"history": []
 			};
-			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			options.historyFile = "HISTORY_FILE_PATH";
 			fs.existsSync = sinon.stub().returns(true);
 			fs.readFile = sinon.stub();
 
@@ -277,7 +277,7 @@ describe("lib/cli", function() {
 			var readlineInstance = {
 				"history": []
 			};
-			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			options.historyFile = "HISTORY_FILE_PATH";
 			fs.existsSync = sinon.stub().returns(true);
 			fs.readFile = sinon.stub();
 
@@ -293,7 +293,7 @@ describe("lib/cli", function() {
 			var readlineInstance = {
 				"history": []
 			};
-			options.getHistoryFile = sinon.stub().returns("HISTORY_FILE_PATH");
+			options.historyFile = "HISTORY_FILE_PATH";
 			fs.existsSync = sinon.stub().returns(true);
 			fs.readFile = sinon.stub();
 
